@@ -157,7 +157,8 @@ else
 EMBED_EXP := $(EMBEDDIR)/cve_exp32_arm32
 EXP_SRCS := \
   $(call pick_src,exp32/main.c) \
-  $(if $(wildcard $(TARGET_DIR)/stack.c),$(TARGET_DIR)/stack.c,$(call pick_src,exp32/stack.c))
+  $(if $(wildcard $(TARGET_DIR)/stack.c),$(TARGET_DIR)/stack.c,$(call pick_src,exp32/stack.c)) \
+  $(wildcard $(TARGET_DIR)/exp32/tls_align.S)
 
 API32 ?= 28
 NDK_CC32 := $(NDK_TOOLCHAIN)/bin/armv7a-linux-androideabi$(API32)-clang
