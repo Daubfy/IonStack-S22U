@@ -356,6 +356,9 @@ int is_direct_ptr(uintptr_t value);
 
 int slide_leak_kernel_base(void);
 
+/* BVK1 temp-root mode: skip pipe/physrw, drive umh root via CFI primitive. */
+int cve_temp_root_mode(void);
+
 ssize_t configfs_write_once(
     int fd, uintptr_t target, const void *data, size_t len);
 ssize_t configfs_read_once(int fd, uintptr_t target, void *data, size_t len);

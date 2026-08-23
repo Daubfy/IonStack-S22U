@@ -45,11 +45,17 @@ _Static_assert(sizeof(struct umh_completion) == 32, "completion layout");
 
 static int root_read_data(
     int fd, uintptr_t target, void *data, size_t len) {
+  if (cve_temp_root_mode()) {
+    return configfs_read_once(fd, target, data, len) == (ssize_t)len;
+  }
   return pipe_phys_read_data(fd, target, data, len);
 }
 
 static int root_write_data(
     int fd, uintptr_t target, const void *data, size_t len) {
+  if (cve_temp_root_mode()) {
+    return configfs_write_once(fd, target, data, len) == (ssize_t)len;
+  }
   return pipe_phys_write_data(fd, target, data, len);
 }
 
