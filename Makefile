@@ -33,9 +33,9 @@ CORE_SRCS := \
   $(call pick_src,slide.c) \
   $(call pick_src,fops.c) \
   $(call pick_src,pipe.c) \
-  src/api.c \
+  $(call pick_src,api.c) \
   $(BLOB_S) \
-  src/root.c
+  $(call pick_src,root.c)
 else
 EXP_OUT := $(OUTDIR)/cve-exp32
 BLOB_S := src/exp32_blob.S
@@ -45,12 +45,12 @@ CORE_SRCS := \
   $(call pick_src,slide.c) \
   $(call pick_src,fops.c) \
   $(call pick_src,pipe.c) \
-  src/api.c \
+  $(call pick_src,api.c) \
   $(BLOB_S) \
-  src/root.c
+  $(call pick_src,root.c)
 endif
 
-PRELOAD_SRCS := $(CORE_SRCS) src/preload.c
+PRELOAD_SRCS := $(CORE_SRCS) $(call pick_src,preload.c)
 
 # Buildroot cross-compilation toolchain
 BUILDROOT_DIR := buildroot-tc
@@ -131,19 +131,24 @@ ifdef USE_EXP64
 EMBED_EXP := $(EMBEDDIR)/cve_exp64_arm64
 EXP_SRCS := $(call pick_src,exp64/main.c) $(call pick_src,exp64/stack.c)
 
-API64 ?= 28
+API64 ?= $(API)
 NDK_CC64 := $(NDK_TOOLCHAIN)/bin/aarch64-linux-android$(API64)-clang
 HOST_CC64 ?= aarch64-linux-android$(API64)-clang
 
-ifeq ($(shell command -v $(HOST_CC64) >/dev/null 2>&1 && echo yes),yes)
-  EXP_CC := $(HOST_CC64)
-  EXP_CFLAGS := -O2 -g0 -Wall -Isrc -I$(TARGET_DIR) -static -pthread
+ifneq ($(and $(USE_BUILDROOT),$(wildcard $(BUILDROOT_CC))),)
+  EXP_CC := $(BUILDROOT_CC)
+  EXP_CFLAGS := --sysroot=$(BUILDROOT_SYSROOT) -O2 -g0 -Wall -Isrc -I$(TARGET_DIR) -pthread \
+    -Wno-unused-parameter -Wno-unused-function
   EXP_LDFLAGS := -static -pthread
+else ifeq ($(shell command -v $(HOST_CC64) >/dev/null 2>&1 && echo yes),yes)
+  EXP_CC := $(HOST_CC64)
+  EXP_CFLAGS := -O2 -g0 -Wall -Isrc -I$(TARGET_DIR) -static-pie -pthread
+  EXP_LDFLAGS := -static-pie -pthread
 else ifneq ($(wildcard $(NDK_CC64)),)
   EXP_CC := $(NDK_CC64)
   EXP_CFLAGS := -O2 -g0 -Wall -Isrc -I$(TARGET_DIR) -fPIE -pthread \
     -Wno-unused-parameter -Wno-unused-function
-  EXP_LDFLAGS := -static -pie -pthread
+  EXP_LDFLAGS := -static-pie -pthread
 else
   $(error no 64-bit ARM toolchain: install aarch64-linux-android-gcc or an NDK)
 endif
