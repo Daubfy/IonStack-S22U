@@ -19,10 +19,7 @@ endef
 USE_EXP64 := $(if $(wildcard $(TARGET_DIR)/exp64),1,)
 
 PRELOAD := $(OUTDIR)/cve-2026-43499
-EXPLOIT_EXEC := $(OUTDIR)/cve-2026-43499-exec
 ROOT_HELPER := $(OUTDIR)/cve-2026-43499-root
-TEST_SKB_RECLAIM := $(OUTDIR)/test-skb-reclaim
-TEST_PSELECT_ROUTE := $(OUTDIR)/test-pselect-route
 
 ifdef USE_EXP64
 EXP_OUT := $(OUTDIR)/cve-exp64
@@ -88,7 +85,7 @@ ifneq ($(origin CC),default)
   TARGET_FLAGS :=
   TARGET_COMMON_LDFLAGS :=
   TARGET_PIE_LDFLAGS :=
-else ifneq ($(and $(or $(filter-out S908WVLS8FYG7,$(PROJECT)),$(USE_BUILDROOT)),$(wildcard $(BUILDROOT_CC))),)
+else ifneq ($(and $(USE_BUILDROOT),$(wildcard $(BUILDROOT_CC))),)
   BUILDROOT_CC_WORKS := $(shell $(BUILDROOT_CC) --version >/dev/null 2>&1 && echo yes)
   ifeq ($(BUILDROOT_CC_WORKS),yes)
     TARGET_CC := $(BUILDROOT_CC)
@@ -189,15 +186,9 @@ TARGET_CFLAGS := -DTARGET_CONFIG_H=\"targets/$(PROJECT)/target.h\" -I$(TARGET_DI
 
 .DEFAULT_GOAL := preload
 
-.PHONY: all preload exploit-exec root-helper test-skb-reclaim test-pselect-route info clean list-projects
+.PHONY: all preload root-helper info clean list-projects
 
-all: preload exploit-exec root-helper $(EXP_OUT)
-
-exploit-exec: $(EXPLOIT_EXEC)
-
-test-skb-reclaim: $(TEST_SKB_RECLAIM)
-
-test-pselect-route: $(TEST_PSELECT_ROUTE)
+all: preload root-helper
 
 preload: $(PRELOAD) $(EXP_OUT)
 
@@ -230,24 +221,6 @@ $(PRELOAD): $(PRELOAD_SRCS) $(EMBED_EXP) $(TARGET_HEADER) src/offset.h src/commo
 	ln -sf $(notdir $@) $(OUTDIR)/cve.so
 	sha256sum $@
 
-$(EXPLOIT_EXEC): $(CORE_SRCS) src/exploit_main.c $(EMBED_EXP) $(TARGET_HEADER) src/offset.h src/common.h src/kernelsnitch/*.h | $(OUTDIR)
-	$(TARGET_CC) $(TARGET_FLAGS) $(PIE_CFLAGS) $(WARN_CFLAGS) $(TARGET_CFLAGS) \
-	  $(CORE_SRCS) src/exploit_main.c $(TARGET_PIE_LDFLAGS) -o $@ -pthread
-	ln -sf $(notdir $@) $(OUTDIR)/cve-exec
-	sha256sum $@
-
-$(TEST_SKB_RECLAIM): test-programs/test_skb_reclaim.c src/util.c $(TARGET_HEADER) src/offset.h src/kernelsnitch/*.h | $(OUTDIR)
-	$(TARGET_CC) $(TARGET_FLAGS) $(PIE_CFLAGS) $(WARN_CFLAGS) $(TARGET_CFLAGS) \
-	  test-programs/test_skb_reclaim.c src/util.c $(TARGET_PIE_LDFLAGS) \
-	  -o $@ -pthread
-	sha256sum $@
-
-$(TEST_PSELECT_ROUTE): test-programs/test_pselect_route.c src/util.c $(TARGET_HEADER) src/offset.h src/kernelsnitch/*.h | $(OUTDIR)
-	$(TARGET_CC) $(TARGET_FLAGS) $(PIE_CFLAGS) $(WARN_CFLAGS) $(TARGET_CFLAGS) \
-	  test-programs/test_pselect_route.c src/util.c $(TARGET_PIE_LDFLAGS) \
-	  -o $@ -pthread
-	sha256sum $@
-
 info:
 	@echo "PROJECT=$(PROJECT)"
 	@echo "USE_EXP64=$(USE_EXP64)"
@@ -257,7 +230,6 @@ info:
 	@echo "TARGET_COMMON_LDFLAGS=$(TARGET_COMMON_LDFLAGS)"
 	@echo "TARGET_PIE_LDFLAGS=$(TARGET_PIE_LDFLAGS)"
 	@echo "PRELOAD=$(PRELOAD)"
-	@echo "EXPLOIT_EXEC=$(EXPLOIT_EXEC)"
 	@echo "ROOT_HELPER=$(ROOT_HELPER)"
 	@echo "CORE_SRCS=$(CORE_SRCS)"
 
