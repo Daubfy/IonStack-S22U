@@ -2,6 +2,16 @@
 
 https://github.com/user-attachments/assets/f3d0858d-f8f5-444f-8ae5-541c2bc744c3
 
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/9f687fdd-04bc-4ba7-88fe-6ccc26df6253" width="300"></td>
+    <td><img src="https://github.com/user-attachments/assets/8837b552-bd18-45f5-9780-94e857b48d33" width="300"></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/a5e48699-a7e3-4c7a-96df-c2fbf03c74c5" width="300"></td>
+    <td><img src="https://github.com/user-attachments/assets/85c626c8-7fe5-406e-a45f-c76b23d44566" width="300"></td>
+  </tr>
+</table>
 
 This repository contains a device-specific port of the CVE-2026-43499
 exploit for the Samsung Galaxy S22 Ultra (SM-S908W).
@@ -144,6 +154,31 @@ Permissive
 
 The initial stage is race-based. A child that exits with `root=0`
 is retried automatically. Successful execution restores `ashmem_misc.fops`, switches SELinux to permissive, and starts the root helper daemon until the next reboot.
+
+## Persistent root with KernelSU-Next
+
+The exploit above only holds root for the current boot. To get a Manager app and `su`-style control for the rest of the session, load [KernelSU-Next](https://github.com/sarabpal-dev/KernelSU-Next) as a late-load kernel module through the root helper.
+
+1. Download both release assets from [`v3.3.0-android12-5.10`](https://github.com/sarabpal-dev/KernelSU-Next/releases/tag/v3.3.0-android12-5.10):
+   - [`KernelSU_Next_v3.3.0-release.apk`](https://github.com/sarabpal-dev/KernelSU-Next/releases/download/v3.3.0-android12-5.10/KernelSU_Next_v3.3.0-release.apk) — Manager app
+   - [`kernelsu-android12-5.10.ko`](https://github.com/sarabpal-dev/KernelSU-Next/releases/download/v3.3.0-android12-5.10/kernelsu-android12-5.10.ko) — LKM kernel module
+
+2. Install the Manager APK:
+
+```sh
+adb install KernelSU_Next_v3.3.0-release.apk
+```
+
+3. Push the module and load it through the root helper obtained above:
+
+```sh
+adb push kernelsu-android12-5.10.ko /data/local/tmp/kernelsu-android12-5.10.ko
+adb shell "/data/local/tmp/cve-2026-43499-root -c 'insmod /data/local/tmp/kernelsu-android12-5.10.ko'"
+```
+
+4. Open the KernelSU Next app on the device — it should detect the loaded module and expose superuser management, module/Zygisk support, and `ksud soft-reboot`.
+
+Since this is a late-loaded LKM (not a patched boot image), it does not survive a reboot — you'll need to re-run the exploit and re-`insmod` the module each time the device restarts.
 
 > [!WARNING]
 > **Reliability & Kernel Panic Notice:**
