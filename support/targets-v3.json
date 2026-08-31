@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 3,
+  "payloads": [
+    {
+      "payloadId": "S901EXXSEGZE3",
+      "displayName": "Galaxy S22 (SM-S901E) | S901EXXSEGZE3 | Kernel 5.10.236",
+      "models": ["SM-S901E"],
+      "kernelVersions": ["5.10.236"],
+      "exploit": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901EXXSEGZE3/cve-2026-43499",
+        "size": 116200
+      },
+      "exploitRoot": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901EXXSEGZE3/cve-2026-43499-root",
+        "size": 13960
+      },
+      "exploitHelper": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901EXXSEGZE3/cve-exp32",
+        "size": 11132
+      },
+      "kernelsu": {
+        "url": "https://github.com/sarabpal-dev/KernelSU-Next/releases/download/v3.3.0-android12-5.10/kernelsu-android12-5.10.ko",
+        "size": 461880
+      }
+    },
+    {
+      "payloadId": "S901USQSAGZF3",
+      "displayName": "Galaxy S22 (SM-S901U) | S901USQSAGZF3 | Kernel 5.10.236",
+      "models": ["SM-S901U"],
+      "kernelVersions": ["5.10.236"],
+      "exploit": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901USQSAGZF3/cve-2026-43499",
+        "size": 1838376
+      },
+      "exploitRoot": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901USQSAGZF3/cve-2026-43499-root",
+        "size": 14120
+      },
+      "exploitHelper": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901USQSAGZF3/cve-exp32",
+        "size": 1733128
+      },
+      "kernelsu": {
+        "url": "https://github.com/sarabpal-dev/KernelSU-Next/releases/download/v3.3.0-android12-5.10/kernelsu-android12-5.10.ko",
+        "size": 461880
+      }
+    },
+    {
+      "payloadId": "S901U1UESAGZF3",
+      "displayName": "Galaxy S22 (SM-S901U1) | S901U1UESAGZF3 | Kernel 5.10.236",
+      "models": ["SM-S901U1"],
+      "kernelVersions": ["5.10.236"],
+      "exploit": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901U1UESAGZF3/cve-2026-43499",
+        "size": 116200
+      },
+      "exploitRoot": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901U1UESAGZF3/cve-2026-43499-root",
+        "size": 13960
+      },
+      "exploitHelper": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901U1UESAGZF3/cve-exp32",
+        "size": 11132
+      },
+      "kernelsu": {
+        "url": "https://github.com/sarabpal-dev/KernelSU-Next/releases/download/v3.3.0-android12-5.10/kernelsu-android12-5.10.ko",
+        "size": 461880
+      }
+    },
+    {
+      "payloadId": "S908EXXSEGZE3",
+      "displayName": "Galaxy S22 Ultra (SM-S908E) | S908EXXSEGZE3 | Kernel 5.10.236",
+      "models": ["SM-S908E"],
+      "kernelVersions": ["5.10.236"],
+      "exploit": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S908EXXSEGZE3/cve-2026-43499",
+        "size": 116200
+      },
+      "exploitRoot": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S908EXXSEGZE3/cve-2026-43499-root",
+        "size": 13960
+      },
+      "exploitHelper": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S908EXXSEGZE3/cve-exp32",
+        "size": 11132
+      },
+      "kernelsu": {
+        "url": "https://github.com/sarabpal-dev/KernelSU-Next/releases/download/v3.3.0-android12-5.10/kernelsu-android12-5.10.ko",
+        "size": 461880
+      }
+    },
+    {
+      "payloadId": "S908USQSAGZF3",
+      "displayName": "Galaxy S22 Ultra (SM-S908U) | S908USQSAGZF3 | Kernel 5.10.236",
+      "models": ["SM-S908U"],
+      "kernelVersions": ["5.10.236"],
+      "exploit": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S908USQSAGZF3/cve-2026-43499",
+        "size": 1838328
+      },
+      "exploitRoot": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S908USQSAGZF3/cve-2026-43499-root",
+        "size": 14120
+      },
+      "exploitHelper": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S908USQSAGZF3/cve-exp32",
+        "size": 1733088
+      },
+      "kernelsu": {
+        "url": "https://github.com/sarabpal-dev/KernelSU-Next/releases/download/v3.3.0-android12-5.10/kernelsu-android12-5.10.ko",
+        "size": 461880
+      }
+    }
+  ]
+}
