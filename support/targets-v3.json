@@ -28,6 +28,32 @@
       }
     },
     {
+      "payloadId": "S901U1UESAGZF3",
+      "displayName": "Galaxy S22 (SM-S901U1) | S901U1UESAGZF3 | Kernel 5.10.236",
+      "models": [
+        "SM-S901U1"
+      ],
+      "kernelVersions": [
+        "5.10.236"
+      ],
+      "exploit": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901U1UESAGZF3/cve-2026-43499",
+        "size": 116200
+      },
+      "exploitRoot": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901U1UESAGZF3/cve-2026-43499-root",
+        "size": 13960
+      },
+      "exploitHelper": {
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901U1UESAGZF3/cve-exp32",
+        "size": 11132
+      },
+      "kernelsu": {
+        "url": "https://github.com/sarabpal-dev/KernelSU-Next/releases/download/v3.3.0-android12-5.10/kernelsu-android12-5.10.ko",
+        "size": 461880
+      }
+    },
+    {
       "payloadId": "S901USQSAGZF3",
       "displayName": "Galaxy S22 (SM-S901U) | S901USQSAGZF3 | Kernel 5.10.236",
       "models": [
@@ -54,24 +80,24 @@
       }
     },
     {
-      "payloadId": "S901U1UESAGZF3",
-      "displayName": "Galaxy S22 (SM-S901U1) | S901U1UESAGZF3 | Kernel 5.10.236",
+      "payloadId": "S906U1UESAGZF3",
+      "displayName": "Galaxy S22+ (SM-S906U1) | S906U1UESAGZF3 | Kernel 5.10.236",
       "models": [
-        "SM-S901U1"
+        "SM-S906U1"
       ],
       "kernelVersions": [
         "5.10.236"
       ],
       "exploit": {
-        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901U1UESAGZF3/cve-2026-43499",
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S906U1UESAGZF3/cve-2026-43499",
         "size": 116200
       },
       "exploitRoot": {
-        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901U1UESAGZF3/cve-2026-43499-root",
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S906U1UESAGZF3/cve-2026-43499-root",
         "size": 13960
       },
       "exploitHelper": {
-        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S901U1UESAGZF3/cve-exp32",
+        "url": "https://raw.githubusercontent.com/Daubfy/IonStack-S22U/main/artifacts/S906U1UESAGZF3/cve-exp32",
         "size": 11132
       },
       "kernelsu": {
