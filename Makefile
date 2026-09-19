@@ -176,7 +176,7 @@ else ifneq ($(wildcard $(NDK_CC32)),)
   EXP_CC := $(NDK_CC32)
   EXP_CFLAGS := -O2 -g0 -Wall -Isrc $(TARGET_CFLAGS) -fPIE -pthread \
     -Wno-unused-parameter -Wno-unused-function
-  EXP_LDFLAGS := -static -pie -pthread
+  EXP_LDFLAGS := -static -pie -pthread -Wl,--tls-alignment=3
 else
   $(error no 32-bit ARM toolchain: install arm-linux-gnueabi-gcc or an NDK)
 endif
